@@ -1,18 +1,28 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+  <div class="app-contain">
+    <div class="left-contain">
+      <redis-nav />
+    </div>
+    <div class="right-contain">
+
+    </div>
   </div>
 </template>
 
-<script lang="ts">
-import { Options, Vue } from 'vue-class-component';
-import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
+<script setup lang="ts">
+import RedisNav from '@/components/RedisNav.vue'
 
-@Options({
-  components: {
-    HelloWorld,
-  },
-})
-export default class Home extends Vue {}
 </script>
+<style>
+.app-contain {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+.left-contain {
+  width: 400px;
+}
+.right-contain {
+  width: 100%;
+}
+</style>
