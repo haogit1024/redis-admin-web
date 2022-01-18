@@ -7,11 +7,54 @@
     </div>
   </div>
   <div class="nav">
+    <div class="redis_item" v-for="redis in redisList" :key="redis.id">
+      <div class="redis_item_header">
+        <div v-show="redis.isOpen">
+          <el-icon v-show="redis.isAction"><arrow-right-bold /></el-icon>
+          <el-icon v-show="!redis.isAction"><arrow-down-bold /></el-icon>
+        </div>
+        <div @click="redisOpen(redis)">
+          <el-icon><list /></el-icon>{{ redis.name }}
+        </div>
+      </div>
+      <div class="redis_item_body" v-show="redis.isAction">
+        <div class="redis_item_db" v-for="index of redis.database" :key="index">
+          <el-icon><coin /></el-icon>{{ index }}
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { CirclePlusFilled, UploadFilled, Download } from '@element-plus/icons-vue'
+import { CirclePlusFilled, UploadFilled, Download, List, ArrowRightBold, ArrowDownBold, Coin } from '@element-plus/icons-vue'
+import Redis from '@/models/Redis'
+
+// 模拟数据 TODO 用 reactive 动态
+const redisList: Redis[] = []
+const mockRedis: Redis = {
+  id: 1,
+  createdTime: '',
+  creator: 1,
+  updatedTime: '',
+  updater: 1,
+  isDelete: 0,
+  host: '',
+  password: '',
+  lastConnectionTime: new Date().getTime(),
+  lastConnectionIp: '',
+  name: '测试链接',
+  database: 16,
+  isAction: false,
+  isOpen: false
+}
+redisList.push(mockRedis)
+const redisOpen = (redis: Redis) => {
+  if (!redis.isOpen) {
+    redis.isOpen = true
+    redis.isAction = true
+  }
+}
 </script>
 
 <style scoped>
