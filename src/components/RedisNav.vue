@@ -9,17 +9,30 @@
   <div class="nav">
     <div class="redis_item" v-for="redis in redisList" :key="redis.id">
       <div class="redis_item_header">
-        <div v-show="redis.isOpen">
-          <el-icon v-show="redis.isAction"><arrow-right-bold /></el-icon>
-          <el-icon v-show="!redis.isAction"><arrow-down-bold /></el-icon>
+        <div v-show="redis.isConnected" class="redis_item_header_icon">
+          <el-icon v-show="!redis.isOpen" @click="redis.isOpen = true"><arrow-right-bold /></el-icon>
+          <el-icon v-show="redis.isOpen" @click="redis.isOpen = false"><arrow-down-bold /></el-icon>
         </div>
         <div @click="redisOpen(redis)">
           <el-icon><list /></el-icon>{{ redis.name }}
         </div>
       </div>
-      <div class="redis_item_body" v-show="redis.isAction">
-        <div class="redis_item_db" v-for="index of redis.database" :key="index">
-          <el-icon><coin /></el-icon>{{ index }}
+      <div class="redis_item_body" v-show="redis.isOpen">
+        <div class="redis_item_db" v-for="(db, index) in redis.redisDatabases" :key="index">
+          <div>
+            <span v-show="db.isInit">
+              <el-icon v-show="!db.isOpen" @click="db.isOpen = true"><arrow-right-bold /></el-icon>
+              <el-icon v-show="db.isOpen" @click="db.isOpen = false"><arrow-down-bold /></el-icon>
+            </span>
+              <span @click="redisDatabaseClick(db)">
+              <el-icon><coin /></el-icon>{{ db.index }}<span v-show="db.isInit">({{ db.keys.length }})</span>
+            </span>
+          </div>
+          <div class="database_keys" v-show="db.isInit && db.isOpen">
+            <div v-for="(key, index) in db.keys" :key="index">
+              <div @click="handleKeyClick(redis.id, db.index, key)">{{ key }}</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -28,32 +41,55 @@
 
 <script setup lang="ts">
 import { CirclePlusFilled, UploadFilled, Download, List, ArrowRightBold, ArrowDownBold, Coin } from '@element-plus/icons-vue'
-import Redis from '@/models/Redis'
+import Redis from '@/modules/Redis'
+import RedisDatabase from "@/modules/RedisDatabase"
+import { reactive } from 'vue'
+import { mockRedisList, mockKeyList } from "@/mock/MockData"
 
-// 模拟数据 TODO 用 reactive 动态
-const redisList: Redis[] = []
-const mockRedis: Redis = {
-  id: 1,
-  createdTime: '',
-  creator: 1,
-  updatedTime: '',
-  updater: 1,
-  isDelete: 0,
-  host: '',
-  password: '',
-  lastConnectionTime: new Date().getTime(),
-  lastConnectionIp: '',
-  name: '测试链接',
-  database: 16,
-  isAction: false,
-  isOpen: false
+// 模拟数据
+const initRedisDatabase = (database: number) => {
+  const databases: RedisDatabase[] = reactive([])
+  for (let i = 0; i < database; i++) {
+    const redisDatabase = {
+      index: i,
+      isOpen: false,
+      keys: [],
+      isInit: false
+    }
+    databases.push(redisDatabase)
+  }
+  return databases
 }
-redisList.push(mockRedis)
+const redisList: Redis[] = reactive([])
+// redisList.push(...mockRedisList)
+// mockRedisList.forEach(db => {
+//   db.redisDatabases = initRedisDatabase(db.databases)
+//   redisList.push(db)
+// })
+for (let i = 0; i < mockRedisList.length; i++) {
+  const db = mockRedisList[i]
+  db.redisDatabases = initRedisDatabase(db.databases)
+  redisList.push(db)
+}
+
 const redisOpen = (redis: Redis) => {
   if (!redis.isOpen) {
     redis.isOpen = true
-    redis.isAction = true
+    redis.isConnected = true
   }
+}
+
+const redisDatabaseClick = (database: RedisDatabase) => {
+  if (!database.isInit) {
+    // TODO get keys
+    database.keys.push(...mockKeyList)
+    database.isInit = true
+  }
+  database.isOpen = true
+}
+
+const handleKeyClick = (id: number, db: number, key: string) => {
+  // TODO get redis key
 }
 </script>
 
@@ -76,5 +112,27 @@ const redisOpen = (redis: Redis) => {
   display: flex;
   flex-direction: row;
   align-content: center;
+}
+
+.redis_item_header {
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.redis_item_header_icon {
+  /* TODO 让icon没有内容的时候也占据一定的宽度 */
+}
+
+.redis_item_db {
+  cursor: pointer;
+  margin-left: 15px;
+  margin-bottom: 5px;
+}
+
+.database_keys {
+  cursor: pointer;
+  margin-left: 15px;
 }
 </style>
