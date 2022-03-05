@@ -11,6 +11,7 @@
 
 <script setup lang="ts">
 import RedisNav from '@/components/RedisNav.vue'
+import RedisValue from '@/components/RedisValue.vue'
 
 </script>
 <style>

@@ -25,12 +25,15 @@
               <el-icon v-show="db.isOpen" @click="db.isOpen = false"><arrow-down-bold /></el-icon>
             </span>
               <span @click="redisDatabaseClick(db)">
-              <el-icon><coin /></el-icon>{{ db.index }}<span v-show="db.isInit">({{ db.keys.length }})</span>
+              <el-icon><coin /></el-icon><span>{{ db.index }}</span><span v-show="db.isInit">({{ db.keys.length }})</span>
             </span>
           </div>
           <div class="database_keys" v-show="db.isInit && db.isOpen">
             <div v-for="(key, index) in db.keys" :key="index">
-              <div @click="handleKeyClick(redis.id, db.index, key)">{{ key }}</div>
+              <div class="database_key" @click="handleKeyClick(redis.id, db.index, key)">
+                <div>{{ key }}</div>
+                <div class="icon"><el-icon><delete-filled /></el-icon></div>
+              </div>
             </div>
           </div>
         </div>
@@ -40,12 +43,15 @@
 </template>
 
 <script setup lang="ts">
-import { CirclePlusFilled, UploadFilled, Download, List, ArrowRightBold, ArrowDownBold, Coin } from '@element-plus/icons-vue'
+import { CirclePlusFilled, UploadFilled, Download, List, ArrowRightBold, ArrowDownBold, Coin, DeleteFilled } from '@element-plus/icons-vue'
 import Redis from '@/modules/Redis'
 import RedisDatabase from "@/modules/RedisDatabase"
 import { reactive } from 'vue'
+import { useStore } from "vuex"
+import { mutationTypes } from "@/store/store-type"
 import { mockRedisList, mockKeyList } from "@/mock/MockData"
 
+const store = useStore()
 // 模拟数据
 const initRedisDatabase = (database: number) => {
   const databases: RedisDatabase[] = reactive([])
@@ -89,8 +95,16 @@ const redisDatabaseClick = (database: RedisDatabase) => {
 }
 
 const handleKeyClick = (id: number, db: number, key: string) => {
-  // TODO get redis key
+  store.commit(
+      mutationTypes.REDIS_KEY_CLICK,
+      {
+        id: id,
+        dbIndex: db,
+        key: key
+      }
+  )
 }
+
 </script>
 
 <style scoped>
@@ -126,13 +140,26 @@ const handleKeyClick = (id: number, db: number, key: string) => {
 }
 
 .redis_item_db {
-  cursor: pointer;
   margin-left: 15px;
   margin-bottom: 5px;
 }
 
-.database_keys {
+.redis_item_db span {
   cursor: pointer;
+}
+
+.database_keys {
   margin-left: 15px;
 }
+
+.database_key {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.database_key div {
+  cursor: pointer;
+}
+
 </style>
